@@ -10,6 +10,7 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
+    # Core CLI
     git
     gh
     curl
@@ -22,5 +23,15 @@
     htop
     unzip
     zip
+
+    # Development
+    nodejs_22
+    bun
+    python3
+
+    # Terminal/dev utilities
+    tmux
+    gcc
+    gnumake
   ];
 }
