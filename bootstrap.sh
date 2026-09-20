@@ -2,7 +2,7 @@
 set -euo pipefail
 
 DEV_USER="sudhz"
-DEVBOX_REPO="https://github.com/sudhz/devbox.git"
+DEVBOX_REPO="sudhz/devbox"
 DEVBOX_DIR="/home/$DEV_USER/devbox"
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -47,62 +47,104 @@ fi
 usermod -aG sudo "$DEV_USER"
 
 echo "==> Installing GitHub SSH keys"
-install -d -m 700 -o "$DEV_USER" -g "$DEV_USER" "/home/$DEV_USER/.ssh"
+install \
+  -d \
+  -m 700 \
+  -o "$DEV_USER" \
+  -g "$DEV_USER" \
+  "/home/$DEV_USER/.ssh"
 
 curl -fsSL "https://github.com/$DEV_USER.keys" \
   > "/home/$DEV_USER/.ssh/authorized_keys"
 
-chown "$DEV_USER:$DEV_USER" "/home/$DEV_USER/.ssh/authorized_keys"
+chown \
+  "$DEV_USER:$DEV_USER" \
+  "/home/$DEV_USER/.ssh/authorized_keys"
+
 chmod 600 "/home/$DEV_USER/.ssh/authorized_keys"
 
 echo "==> Installing multi-user Nix"
 if [ ! -x /nix/var/nix/profiles/default/bin/nix ]; then
-  curl -L https://nixos.org/nix/install | sh -s -- --daemon
+  curl -L https://nixos.org/nix/install \
+    | sh -s -- --daemon
 fi
+
+echo "==> Configuring Nix"
 
 mkdir -p /etc/nix
 
-grep -q '^experimental-features' /etc/nix/nix.conf 2>/dev/null \
-  || echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+set_nix_option() {
+  local key="$1"
+  local value="$2"
 
-grep -q '^auto-optimise-store' /etc/nix/nix.conf 2>/dev/null \
-  || echo 'auto-optimise-store = true' >> /etc/nix/nix.conf
+  if grep -q "^${key} =" /etc/nix/nix.conf 2>/dev/null; then
+    sed -i \
+      "s|^${key} =.*|${key} = ${value}|" \
+      /etc/nix/nix.conf
+  else
+    echo "${key} = ${value}" >> /etc/nix/nix.conf
+  fi
+}
 
-grep -qF 'extra-substituters = https://herdr.cachix.org' /etc/nix/nix.conf 2>/dev/null \
-  || echo 'extra-substituters = https://herdr.cachix.org' >> /etc/nix/nix.conf
+set_nix_option \
+  "experimental-features" \
+  "nix-command flakes"
 
-grep -qF 'extra-trusted-public-keys = herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I=' /etc/nix/nix.conf 2>/dev/null \
-  || echo 'extra-trusted-public-keys = herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I=' >> /etc/nix/nix.conf
+set_nix_option \
+  "auto-optimise-store" \
+  "true"
+
+# Herdr publishes a Nix binary cache, so trust it system-wide.
+# OMP does NOT need a Nix cache because Home Manager installs its
+# official prebuilt release binary instead of compiling it.
+set_nix_option \
+  "extra-substituters" \
+  "https://herdr.cachix.org"
+
+set_nix_option \
+  "extra-trusted-public-keys" \
+  "herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I="
 
 systemctl restart nix-daemon
 
-echo "==> Cloning devbox configuration"
-if [ ! -d "$DEVBOX_DIR/.git" ]; then
-  sudo -u "$DEV_USER" git clone "$DEVBOX_REPO" "$DEVBOX_DIR"
-else
-  sudo -u "$DEV_USER" git -C "$DEVBOX_DIR" pull --ff-only
-fi
-
 echo
 echo "==> GitHub login is required for this devbox"
-sudo -iu "$DEV_USER" gh auth status >/dev/null 2>&1 || \
-  sudo -iu "$DEV_USER" gh auth login
+
+sudo -iu "$DEV_USER" \
+  gh auth status >/dev/null 2>&1 \
+  || sudo -iu "$DEV_USER" gh auth login
 
 echo "==> Configuring Git identity from GitHub"
+
 sudo -iu "$DEV_USER" bash <<'EOS'
-git config --global user.name "$(gh api user --jq '.name // .login')"
+git config --global user.name \
+  "$(gh api user --jq '.name // .login')"
+
 git config --global user.email "$(
-  gh api user --jq '(.id|tostring) + "+" + .login + "@users.noreply.github.com"'
+  gh api user \
+    --jq '(.id|tostring) + "+" + .login + "@users.noreply.github.com"'
 )"
 EOS
 
+echo "==> Cloning devbox configuration"
+
+if [ ! -d "$DEVBOX_DIR/.git" ]; then
+  sudo -iu "$DEV_USER" \
+    gh repo clone "$DEVBOX_REPO" "$DEVBOX_DIR"
+else
+  sudo -iu "$DEV_USER" \
+    git -C "$DEVBOX_DIR" pull --ff-only
+fi
+
 echo "==> Applying Home Manager configuration"
+
 sudo -iu "$DEV_USER" bash -lc "
   nix run github:nix-community/home-manager/release-26.05 -- \
     switch --flake '$DEVBOX_DIR#sudhz'
 "
 
 echo
-echo "Devbox bootstrap complete."
+echo "==> Devbox bootstrap complete"
+echo
 echo "Next login:"
 echo "  ssh $DEV_USER@<server-ip>"
