@@ -68,6 +68,12 @@ grep -q '^experimental-features' /etc/nix/nix.conf 2>/dev/null \
 grep -q '^auto-optimise-store' /etc/nix/nix.conf 2>/dev/null \
   || echo 'auto-optimise-store = true' >> /etc/nix/nix.conf
 
+grep -qF 'extra-substituters = https://herdr.cachix.org' /etc/nix/nix.conf 2>/dev/null \
+  || echo 'extra-substituters = https://herdr.cachix.org' >> /etc/nix/nix.conf
+
+grep -qF 'extra-trusted-public-keys = herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I=' /etc/nix/nix.conf 2>/dev/null \
+  || echo 'extra-trusted-public-keys = herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I=' >> /etc/nix/nix.conf
+
 systemctl restart nix-daemon
 
 echo "==> Cloning devbox configuration"

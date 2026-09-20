@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   home.username = "sudhz";
@@ -10,7 +10,6 @@
   programs.home-manager.enable = true;
 
   home.packages = with pkgs; [
-    # Core CLI
     git
     gh
     curl
@@ -24,14 +23,14 @@
     unzip
     zip
 
-    # Development
     nodejs_22
     bun
     python3
 
-    # Terminal/dev utilities
     tmux
     gcc
     gnumake
+
+    inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }
