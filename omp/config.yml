@@ -1,0 +1,55 @@
+providers:
+  webSearchOrder:
+    - perplexity
+    - gemini
+    - anthropic
+    - codex
+    - xai
+    - zai
+    - exa
+    - tinyfish
+    - jina
+    - kagi
+    - tavily
+    - firecrawl
+    - brave
+    - kimi
+    - parallel
+    - synthetic
+    - searxng
+    - startpage
+    - duckduckgo
+    - ecosia
+    - google
+    - mojeek
+    - public
+modelRoles:
+  default: openai-codex/gpt-6-astra:xhigh
+  smol: opencode-go/mimo-v2.6-pro:high
+  slow: openai-codex/gpt-6-astra:max
+  vision: openai-codex/gpt-6-astra:xhigh
+  plan: openai-codex/gpt-6-astra:xhigh
+  commit: openai-codex/gpt-6-luna:medium
+  tiny: openai-codex/gpt-6-luna:low
+  task: openai-codex/gpt-6-astra:xhigh
+  advisor: openai-codex/gpt-6-astra:xhigh
+symbolPreset: unicode
+composer:
+  shape: band
+theme:
+  dark: titanium
+  light: light
+setupVersion: 2
+dev:
+  autoqa: false
+  autoqaConsent: denied
+codexResets:
+  autoRedeem: "yes"
+todo:
+  reminders: false
+retry:
+  fallbackChains:
+    openai-codex/gpt-6-astra:
+      - opencode-go/mimo-v2.6-pro:high
+tools:
+  approvalMode: yolo

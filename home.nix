@@ -37,6 +37,16 @@ in
     config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/devbox/herdr/reviewr.toml";
 
+  # OMP user configuration.
+  # Credentials and runtime state remain local in ~/.omp/agent.
+  home.file.".omp/agent/config.yml".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/devbox/omp/config.yml";
+
+  home.file.".omp/agent/mcp.json".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/devbox/omp/mcp.json";
+
   home.packages = with pkgs; [
     # Core CLI
     git
@@ -169,18 +179,22 @@ in
       fi
     '';
 
-  # Install Reviewr automatically on fresh machines.
+  # Install Reviewr automatically and ensure its stable launch links exist.
   home.activation.installReviewr =
     lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       HERDR="${herdrPackage}/bin/herdr"
 
       export PATH="${reviewrInstallPath}:$PATH"
 
-      if "$HERDR" plugin list \
-        --plugin persiyanov.reviewr \
-        --json \
-        | ${pkgs.jq}/bin/jq -e \
-          '.. | objects | select(.plugin_id? == "persiyanov.reviewr")' \
+      PLUGIN_JSON="$(
+        "$HERDR" plugin list \
+          --plugin persiyanov.reviewr \
+          --json
+      )"
+
+      if printf '%s' "$PLUGIN_JSON" |
+        ${pkgs.jq}/bin/jq -e \
+          '.result.plugins | any(.plugin_id == "persiyanov.reviewr")' \
         >/dev/null 2>&1; then
 
         echo "Herdr Reviewr plugin already installed."
@@ -190,6 +204,43 @@ in
         "$HERDR" plugin install \
           persiyanov/herdr-reviewr \
           --yes
+
+        PLUGIN_JSON="$(
+          "$HERDR" plugin list \
+            --plugin persiyanov.reviewr \
+            --json
+        )"
       fi
+
+      REVIEWR_ROOT="$(
+        printf '%s' "$PLUGIN_JSON" |
+          ${pkgs.jq}/bin/jq -r \
+            '.result.plugins[]
+             | select(.plugin_id == "persiyanov.reviewr")
+             | .plugin_root'
+      )"
+
+      REVIEWR_BIN="$REVIEWR_ROOT/bin/herdr-reviewr"
+
+      if [ -z "$REVIEWR_ROOT" ] ||
+         [ "$REVIEWR_ROOT" = "null" ] ||
+         [ ! -x "$REVIEWR_BIN" ]; then
+        echo "Could not locate the installed Herdr Reviewr binary."
+        exit 1
+      fi
+
+      ${pkgs.coreutils}/bin/mkdir -p \
+        "$HOME/.local/bin" \
+        "$HOME/.local/state/herdr/plugins/persiyanov.reviewr/bin"
+
+      ${pkgs.coreutils}/bin/ln -sfn \
+        "$REVIEWR_BIN" \
+        "$HOME/.local/bin/herdr-reviewr"
+
+      ${pkgs.coreutils}/bin/ln -sfn \
+        "$REVIEWR_BIN" \
+        "$HOME/.local/state/herdr/plugins/persiyanov.reviewr/bin/herdr-reviewr"
+
+      echo "Herdr Reviewr launch links are ready."
     '';
 }
