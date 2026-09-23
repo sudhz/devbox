@@ -1,4 +1,4 @@
-{ pkgs, inputs, lib, ... }:
+{ pkgs, inputs, lib, config, ... }:
 
 {
   home.username = "sudhz";
@@ -11,6 +11,10 @@
   home.sessionPath = [
     "/home/sudhz/.local/bin"
   ];
+
+  xdg.configFile."herdr/config.toml".source = 
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/devbox/herdr/config.toml";
 
   home.packages = with pkgs; [
     # Core CLI
