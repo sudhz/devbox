@@ -1,5 +1,21 @@
 { pkgs, inputs, lib, config, ... }:
 
+let
+  herdrPackage =
+    inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+
+  reviewrInstallPath = lib.makeBinPath [
+    pkgs.git
+    pkgs.bash
+    pkgs.curl
+    pkgs.coreutils
+    pkgs.gnugrep
+    pkgs.gnused
+    pkgs.gawk
+    pkgs.gnutar
+    pkgs.gzip
+  ];
+in
 {
   home.username = "sudhz";
   home.homeDirectory = "/home/sudhz";
@@ -7,14 +23,19 @@
 
   programs.home-manager.enable = true;
 
-  # ~/.local/bin is where the official OMP release binary is installed.
   home.sessionPath = [
-    "/home/sudhz/.local/bin"
+    "${config.home.homeDirectory}/.local/bin"
   ];
 
-  xdg.configFile."herdr/config.toml".source = 
+  # Herdr
+  xdg.configFile."herdr/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink
       "${config.home.homeDirectory}/devbox/herdr/config.toml";
+
+  # Herdr Reviewr
+  xdg.configFile."herdr/plugins/config/persiyanov.reviewr/config.toml".source =
+    config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/devbox/herdr/reviewr.toml";
 
   home.packages = with pkgs; [
     # Core CLI
@@ -40,29 +61,18 @@
     tmux
     gcc
     gnumake
-
-    # Herdr
-    inputs.herdr-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ] ++ [
+    herdrPackage
   ];
 
-  # This VPS only has ~24 GB of storage, so don't allow old Nix
-  # generations and unused store paths to accumulate indefinitely.
+  # Keep old Nix generations from filling the VPS disk.
   nix.gc = {
     automatic = true;
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
 
-  # OMP intentionally uses the official prebuilt Linux x64 release rather
-  # than OMP's Nix source build. The source build requires a large Rust/Bun
-  # build environment and can exhaust this VPS's disk.
-  #
-  # Every Home Manager activation:
-  #   - checks GitHub's latest stable OMP release
-  #   - does nothing if that version is already installed
-  #   - otherwise downloads the official binary
-  #   - verifies its GitHub-published SHA-256 digest
-  #   - installs it to ~/.local/bin/omp
+  # Install or update OMP from its official prebuilt Linux x64 release.
   home.activation.installLatestOmp =
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       echo "Checking latest OMP release..."
@@ -156,6 +166,30 @@
         echo "Installed OMP $LATEST_VERSION"
 
         "$HOME/.local/bin/omp" --version
+      fi
+    '';
+
+  # Install Reviewr automatically on fresh machines.
+  home.activation.installReviewr =
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      HERDR="${herdrPackage}/bin/herdr"
+
+      export PATH="${reviewrInstallPath}:$PATH"
+
+      if "$HERDR" plugin list \
+        --plugin persiyanov.reviewr \
+        --json \
+        | ${pkgs.jq}/bin/jq -e \
+          '.. | objects | select(.plugin_id? == "persiyanov.reviewr")' \
+        >/dev/null 2>&1; then
+
+        echo "Herdr Reviewr plugin already installed."
+      else
+        echo "Installing Herdr Reviewr plugin..."
+
+        "$HERDR" plugin install \
+          persiyanov/herdr-reviewr \
+          --yes
       fi
     '';
 }
