@@ -8,19 +8,14 @@ Built for a fresh Ubuntu 24.04 x86_64 VPS. The setup uses Nix + Home Manager and
 
 SSH into the new VPS as root:
 
-```bash id="vtm558"
+```bash
 ssh root@<server-ip>
 ```
 
-Download and run the bootstrap script:
+Run the bootstrap script:
 
-```bash id="ucr0ar"
-curl -fsSL \
-  https://raw.githubusercontent.com/sudhz/devbox/main/bootstrap.sh \
-  -o /tmp/bootstrap.sh
-
-chmod +x /tmp/bootstrap.sh
-/tmp/bootstrap.sh
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/sudhz/devbox/main/bootstrap.sh)
 ```
 
 The script handles the rest, including:
@@ -38,13 +33,13 @@ Complete the GitHub login when prompted.
 
 Once bootstrap finishes, reconnect:
 
-```bash id="1yjci9"
+```bash
 ssh sudhz@<server-ip>
 ```
 
 Then start OMP:
 
-```bash id="zf5nrx"
+```bash
 omp
 ```
 
