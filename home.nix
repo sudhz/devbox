@@ -27,6 +27,8 @@ in
     "${config.home.homeDirectory}/.local/bin"
   ];
 
+  fonts.fontconfig.enable = true;
+
   # Herdr
   xdg.configFile."herdr/config.toml".source =
     config.lib.file.mkOutOfStoreSymlink
@@ -67,7 +69,12 @@ in
     # Development
     nodejs_22
     bun
-    python3
+    (python3.withPackages (ps: [ ps.numpy ]))
+
+    # Browser
+    chromium
+    noto-fonts
+    noto-fonts-color-emoji
 
     # Terminal / build tools
     tmux
