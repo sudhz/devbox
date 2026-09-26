@@ -1,30 +1,5 @@
-providers:
-  webSearchOrder:
-    - perplexity
-    - gemini
-    - anthropic
-    - codex
-    - xai
-    - zai
-    - exa
-    - tinyfish
-    - jina
-    - kagi
-    - tavily
-    - firecrawl
-    - brave
-    - kimi
-    - parallel
-    - synthetic
-    - searxng
-    - startpage
-    - duckduckgo
-    - ecosia
-    - google
-    - mojeek
-    - public
 modelRoles:
-  default: openai-codex/gpt-6-astra:xhigh
+  default: openai-codex/gpt-6-sol:xhigh
   smol: opencode-go/mimo-v2.6-pro:high
   slow: openai-codex/gpt-6-astra:max
   vision: openai-codex/gpt-6-astra:xhigh
@@ -33,6 +8,7 @@ modelRoles:
   tiny: openai-codex/gpt-6-luna:low
   task: openai-codex/gpt-6-astra:xhigh
   advisor: openai-codex/gpt-6-astra:xhigh
+  web: web/perplexity
 symbolPreset: unicode
 composer:
   shape: band
@@ -51,5 +27,27 @@ retry:
   fallbackChains:
     openai-codex/gpt-6-astra:
       - opencode-go/mimo-v2.6-pro:high
+    web:
+      - web/zai
+      - web/exa
+      - web/tinyfish
+      - web/jina
+      - web/kagi
+      - web/tavily
+      - web/firecrawl
+      - web/brave
+      - web/kimi
+      - web/parallel
+      - web/synthetic
+      - web/searxng
+      - web/startpage
+      - web/duckduckgo
+      - web/ecosia
+      - web/google
+      - web/mojeek
+      - web/public
+      - web/ollama
 tools:
   approvalMode: yolo
+generate_image:
+  enabled: true
