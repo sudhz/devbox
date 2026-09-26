@@ -62,6 +62,7 @@ in
     unzip
     zip
     ffmpeg
+    cloudflared
 
     # Development
     nodejs_22
