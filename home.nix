@@ -61,6 +61,7 @@ in
     htop
     unzip
     zip
+    ffmpeg
 
     # Development
     nodejs_22

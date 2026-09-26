@@ -2,7 +2,7 @@
 
 My reproducible VPS development environment.
 
-Built for a fresh Ubuntu 24.04 x86_64 VPS. The setup uses Nix + Home Manager and includes my usual CLI tools, OMP, Herdr, Reviewr, and their tracked configuration.
+Built for a fresh Ubuntu 24.04 x86_64 VPS. The setup uses Nix + Home Manager and includes my usual CLI tools (including FFmpeg), OMP, Herdr, Reviewr, and their tracked configuration.
 
 ## Fresh VPS setup
 
@@ -50,3 +50,11 @@ OMP credentials and runtime state are intentionally not stored in this repo.
 If GitHub access is needed from OMP, set the GitHub token in the environment as usual.
 
 After that, start Herdr and use OMP + Reviewr normally.
+
+## Updating an existing devbox
+
+After changing this repo, apply its Home Manager configuration as `sudhz`:
+
+```bash
+home-manager switch --flake ~/devbox#sudhz
+```
