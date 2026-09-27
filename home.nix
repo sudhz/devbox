@@ -65,6 +65,7 @@ in
     zip
     ffmpeg
     cloudflared
+    dufs
 
     # Development
     nodejs_22
