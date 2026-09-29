@@ -189,6 +189,14 @@ in
       fi
     '';
 
+  # Install or update the gh-image GitHub CLI extension.
+  home.activation.installLatestGhImage =
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      ${pkgs.gh}/bin/gh extension install \
+        drogers0/gh-image \
+        --force
+    '';
+
   # Install Reviewr automatically and ensure its stable launch links exist.
   home.activation.installReviewr =
     lib.hm.dag.entryAfter [ "linkGeneration" ] ''
