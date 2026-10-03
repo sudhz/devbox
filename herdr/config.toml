@@ -1,5 +1,10 @@
 onboarding = false
 
+[terminal]
+shell_mode = "login"
+
 [ui]
+sidebar_start_collapsed = true
+sidebar_collapsed_mode = "hidden"
 mobile_width_threshold = 100
 mouse_capture = true
