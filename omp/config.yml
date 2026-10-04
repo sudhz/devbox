@@ -27,8 +27,6 @@ todo:
   reminders: false
 retry:
   fallbackChains:
-    smol:
-      - opencode-go/glm-5.3-flash:max
     web:
       - web/zai
       - web/exa
