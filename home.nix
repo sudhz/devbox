@@ -189,6 +189,12 @@ in
       fi
     '';
 
+  # Install or update the pi-intercom OMP plugin.
+  home.activation.installLatestPiIntercom =
+    lib.hm.dag.entryAfter [ "installLatestOmp" ] ''
+      PATH="${pkgs.bun}/bin:$PATH" "$HOME/.local/bin/omp" install pi-intercom
+    '';
+
   # Install or update the gh-image GitHub CLI extension.
   home.activation.installLatestGhImage =
     lib.hm.dag.entryAfter [ "linkGeneration" ] ''
