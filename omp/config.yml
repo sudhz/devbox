@@ -3,7 +3,7 @@ modelRoles:
   default: anthropic/claude-opus-5-5:high
   smol: commandcode/z-ai/glm-5.3-flash:max
   slow: openai-codex/gpt-6-astra:max
-  vision: openai-codex/gpt-6-astra:xhigh
+  vision: commandcode/Qwen/Qwen3.8-Max-0902:xhigh
   plan: anthropic/claude-opus-5-5:xhigh
   commit: openai-codex/gpt-6-luna:medium
   tiny: openai-codex/gpt-6-luna:low
@@ -27,6 +27,8 @@ todo:
   reminders: false
 retry:
   fallbackChains:
+    vision:
+      - openai-codex/gpt-6-astra:xhigh
     web:
       - web/zai
       - web/exa
