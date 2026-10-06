@@ -28,6 +28,7 @@ todo:
 retry:
   fallbackChains:
     vision:
+      - opencode-go/qwen3.8-max:high
       - openai-codex/gpt-6-astra:xhigh
     web:
       - web/zai
