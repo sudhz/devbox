@@ -28,8 +28,11 @@ todo:
 retry:
   fallbackChains:
     openai-codex/gpt-6.1-sol:
+      - google-antigravity/gemini-3.8-flash:high
       - commandcode/google/gemini-3.8-flash:high
       - anthropic/claude-sonnet-5-5:xhigh
+      - google-antigravity/claude-sonnet-4-6:high
+      - google-antigravity/claude-opus-4-6:high
     web:
       - web/zai
       - web/exa
