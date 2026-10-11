@@ -26,6 +26,7 @@ codexResets:
 todo:
   reminders: false
 retry:
+  waitForUsageReset: true
   fallbackChains:
     openai-codex/gpt-6.1-sol:
       - google-antigravity/gemini-3.8-flash:high
