@@ -1,6 +1,6 @@
 symbolPreset: nerd
 modelRoles:
-  default: anthropic/claude-opus-5-5:high
+  default: anthropic/claude-opus-5-5:auto
   smol: commandcode/z-ai/glm-5.3-flash:max
   slow: openai-codex/gpt-6-astra:max
   vision: openai-codex/gpt-6.1-sol:xhigh
