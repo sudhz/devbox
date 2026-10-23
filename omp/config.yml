@@ -1,4 +1,5 @@
 symbolPreset: nerd
+personality: friendly
 modelRoles:
   default: anthropic/claude-opus-5-5:auto
   smol: commandcode/z-ai/glm-5.3-flash:max
