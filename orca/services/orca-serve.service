@@ -1,0 +1,17 @@
+[Unit]
+Description=Orca server
+
+[Service]
+ExecStart=%h/.local/share/orca/orca-linux.AppImage serve --supervise --no-pairing --port 6769
+# Nix last: Orca needs Ubuntu's python3 (with gi) for Computer Use.
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin:%h/.nix-profile/bin
+Environment=ORCA_USER_DATA_PATH=%h/.config/orca
+# Orca rejects a group-writable cache.
+UMask=0022
+Restart=on-failure
+RestartSec=10
+# Keeps terminals alive across restarts.
+KillMode=process
+
+[Install]
+WantedBy=default.target

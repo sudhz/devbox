@@ -8,21 +8,15 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    herdr-nix.url = "github:herdrdev/herdr-nix";
   };
 
-  outputs = inputs@{ nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, ... }:
     let
       system = "x86_64-linux";
     in {
       homeConfigurations."sudhz" =
         home-manager.lib.homeManagerConfiguration {
           pkgs = nixpkgs.legacyPackages.${system};
-
-          extraSpecialArgs = {
-            inherit inputs;
-          };
 
           modules = [
             ./home.nix

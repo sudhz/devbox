@@ -23,7 +23,31 @@ apt install -y \
   gh \
   sudo \
   xz-utils \
-  ca-certificates
+  ca-certificates \
+  ufw
+
+echo "==> Installing Orca's system libraries"
+# The Orca AppImage relies on these Ubuntu packages (from Orca's .deb).
+apt install -y \
+  libfuse2t64 \
+  libasound2t64 \
+  libgbm1 \
+  libgtk-3-0t64 \
+  libnotify4 \
+  libnss3 \
+  libxss1 \
+  libxtst6 \
+  libatspi2.0-0t64 \
+  libuuid1 \
+  libsecret-1-0 \
+  xdg-utils \
+  python3 \
+  python3-gi \
+  gir1.2-atspi-2.0 \
+  at-spi2-core \
+  xdotool \
+  xclip \
+  xvfb
 
 echo "==> Configuring 2 GB swap"
 if [ ! -f /swapfile ]; then
@@ -63,6 +87,10 @@ chown \
 
 chmod 600 "/home/$DEV_USER/.ssh/authorized_keys"
 
+echo "==> Allowing only SSH through the firewall"
+ufw allow OpenSSH
+ufw --force enable
+
 echo "==> Installing multi-user Nix"
 if [ ! -x /nix/var/nix/profiles/default/bin/nix ]; then
   curl -L https://nixos.org/nix/install \
@@ -93,17 +121,6 @@ set_nix_option \
 set_nix_option \
   "auto-optimise-store" \
   "true"
-
-# Herdr publishes a Nix binary cache, so trust it system-wide.
-# OMP does NOT need a Nix cache because Home Manager installs its
-# official prebuilt release binary instead of compiling it.
-set_nix_option \
-  "extra-substituters" \
-  "https://herdr.cachix.org"
-
-set_nix_option \
-  "extra-trusted-public-keys" \
-  "herdr.cachix.org-1:3nH7IStRsS0ASfdonA0DCRR2ZrSCeWitZ7Kwew0cR4I="
 
 systemctl restart nix-daemon
 
@@ -136,15 +153,28 @@ else
     git -C "$DEVBOX_DIR" pull --ff-only
 fi
 
+echo "==> Keeping $DEV_USER services running without a login"
+
+loginctl enable-linger "$DEV_USER"
+
+DEV_UID="$(id -u "$DEV_USER")"
+systemctl start "user@$DEV_UID.service"
+
 echo "==> Applying Home Manager configuration"
 
-sudo -iu "$DEV_USER" bash -lc "
+sudo -iu "$DEV_USER" env XDG_RUNTIME_DIR="/run/user/$DEV_UID" \
   nix run github:nix-community/home-manager/release-26.05 -- \
-    switch --flake '$DEVBOX_DIR#sudhz'
-"
+    switch --flake "$DEVBOX_DIR#sudhz"
+
+echo "==> Setting up the Orca server"
+
+sudo -iu "$DEV_USER" env XDG_RUNTIME_DIR="/run/user/$DEV_UID" \
+  "$DEVBOX_DIR/orca/setup.sh"
 
 echo
 echo "==> Devbox bootstrap complete"
 echo
 echo "Next login:"
 echo "  ssh $DEV_USER@<server-ip>"
+echo
+echo "Pair the Mac and phone with the Orca server (see Orca in the README)."

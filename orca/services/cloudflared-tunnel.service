@@ -1,0 +1,10 @@
+[Unit]
+Description=Cloudflare Tunnel for the Orca server
+
+[Service]
+ExecStart=%h/.nix-profile/bin/cloudflared tunnel --no-autoupdate run --token-file %h/.cloudflared/orca.token --url http://127.0.0.1:6769
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
