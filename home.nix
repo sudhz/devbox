@@ -68,7 +68,7 @@ in
     dufs
 
     # Development
-    nodejs_22
+    nodejs
     bun
     (python3.withPackages (ps: [ ps.numpy ]))
 
