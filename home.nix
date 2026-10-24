@@ -77,6 +77,9 @@ in
     noto-fonts
     noto-fonts-color-emoji
 
+    # Fonts for OMP's SVG rendering
+    freefont_ttf
+
     # Terminal / build tools
     tmux
     gcc
